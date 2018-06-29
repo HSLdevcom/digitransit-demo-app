@@ -5,11 +5,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.StandardProtocolFamily;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import fi.hsl.digitransit.domain.DigitransitResponse;
+import fi.hsl.digitransit.transport.DigitransitRequest;
+import fi.hsl.digitransit.transport.DigitransitResponse;
 import fi.hsl.digitransit.domain.Stop;
 import fi.hsl.digitransit.domain.StopAtDistanceConnection;
 import okhttp3.MediaType;
@@ -20,6 +20,8 @@ import okhttp3.Response;
 
 public class GraphQLDigitransitAPI implements DigitransitAPI {
     private static final String API_URL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
+
+    private static final MediaType JSON_CONTENT_TYPE = MediaType.parse("application/json");
 
     private Gson gson = new GsonBuilder()
             //register type adapters for gson
@@ -36,40 +38,45 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
     @Override
     public StopAtDistanceConnection queryStopsByLocation(double latitude, double longitude, int radius) throws IOException {
         //Query stops (and 5 next departures from each stop) by location
-        String query = "{\n" +
-                "  stopsByRadius(lat:" + latitude + ", lon:" + longitude + ", radius:" + radius + ") {\n" +
-                "    edges {\n" +
-                "      node {\n" +
-                "        stop { \n" +
-                "          gtfsId \n" +
-                "          name\n" +
-                "          code\n" +
-                "          lat\n" +
-                "          lon\n" +
-                "          stoptimesWithoutPatterns(numberOfDepartures: 5) {\n" +
-                "            scheduledArrival\n" +
-                "            scheduledDeparture\n" +
-                "            serviceDay\n" +
-                "            trip { tripHeadsign route { shortName } }\n" +
-                "          }\n" +
-                "        }\n" +
-                "        distance\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
+        String query = "query StopsByRadius($lat: Float, $lon: Float, $radius: Int) {" +
+                "  stopsByRadius(lat: $lat, lon: $lon, radius: $radius) {" +
+                "    edges {" +
+                "      node {" +
+                "        stop {" +
+                "          gtfsId" +
+                "          name" +
+                "          code" +
+                "          lat" +
+                "          lon" +
+                "          stoptimesWithoutPatterns(numberOfDepartures: 5) {" +
+                "            scheduledArrival" +
+                "            scheduledDeparture" +
+                "            serviceDay" +
+                "            trip { tripHeadsign route { shortName } }" +
+                "          }" +
+                "        }" +
+                "        distance" +
+                "      }" +
+                "    }" +
+                "  }" +
                 "}";
 
-        return doQuery(query, StopAtDistanceConnection.class);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("lat", latitude);
+        variables.put("lon", longitude);
+        variables.put("radius", radius);
+
+        return doQuery(query, variables, StopAtDistanceConnection.class);
     }
 
     @Override
     public Stop[] queryStops() throws IOException {
         //List all stops with name and GTFS id
-        String query = "{ \n" +
-                        "  stops {\n" +
-                        "    gtfsId\n" +
-                        "    name\n" +
-                        "  }\n" +
+        String query = "query Stops {" +
+                        "stops {" +
+                        "  gtfsId" +
+                        "    name" +
+                        "  }" +
                         "}";
 
         return doQuery(query, Stop[].class);
@@ -77,20 +84,27 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
 
     @Override
     public Stop[] queryStops(String name) throws IOException {
-        //List all stops with name and GTFS id
-        String query = "{ \n" +
-                "  stops(name:"+name+") {\n" +
-                "    gtfsId\n" +
-                "    name\n" +
-                "  }\n" +
+        //Query stops by name
+        String query = "query Stops($name: String) {" +
+                "  stops(name: $name) {" +
+                "    gtfsId" +
+                "    name" +
+                "  }" +
                 "}";
 
         return doQuery(query, Stop[].class);
     }
 
     private <T> T doQuery(String query, Class<T> klass) throws IOException {
-        //HTTP POST request, content type: "application/graphql"
-        Request request = new Request.Builder().url(API_URL).post(RequestBody.create(MediaType.parse("application/graphql"), query)).build();
+        return doQuery(query, null, klass);
+    }
+
+    private <T> T doQuery(String query, Map<String, ?> variables, Class<T> klass) throws IOException {
+        //Create HTTP POST body with query and variables
+        String postBody = gson.toJson(new DigitransitRequest(query, variables));
+
+        //HTTP POST request, content type: "application/json"
+        Request request = new Request.Builder().url(API_URL).post(RequestBody.create(JSON_CONTENT_TYPE, postBody)).build();
 
         try (Response response = httpClient.newCall(request).execute()) {
             //Parse response using Gson
