@@ -1,5 +1,6 @@
 package fi.hsl.demoapp;
 
+import android.Manifest;
 import android.app.Application;
 import android.arch.core.util.Function;
 import android.arch.lifecycle.AndroidViewModel;
@@ -8,6 +9,7 @@ import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresPermission;
 
 import java.util.List;
 
@@ -49,6 +51,7 @@ public class MainViewModel extends AndroidViewModel {
         return locationLiveData.isLocationRequested();
     }
 
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     public void requestData() {
         locationLiveData.requestLocation();
     }

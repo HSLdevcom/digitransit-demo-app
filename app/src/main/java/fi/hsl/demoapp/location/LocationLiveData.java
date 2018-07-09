@@ -1,5 +1,6 @@
 package fi.hsl.demoapp.location;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.LiveData;
 import android.content.Context;
@@ -9,6 +10,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.RequiresPermission;
+import android.util.Log;
 
 public class LocationLiveData extends LiveData<Location> {
     private LocationManager locationManager;
@@ -23,7 +26,7 @@ public class LocationLiveData extends LiveData<Location> {
         return locationRequested;
     }
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     public void requestLocation() {
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_MEDIUM);
