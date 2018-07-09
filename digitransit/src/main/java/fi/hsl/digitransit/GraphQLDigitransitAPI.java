@@ -48,7 +48,7 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
                 "          code" +
                 "          lat" +
                 "          lon" +
-                "          stoptimesWithoutPatterns(numberOfDepartures: 5) {" +
+                "          stoptimesWithoutPatterns(numberOfDepartures: 5, omitNonPickups: true) {" +
                 "            scheduledArrival" +
                 "            scheduledDeparture" +
                 "            serviceDay" +
