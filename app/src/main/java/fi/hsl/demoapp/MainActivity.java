@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import fi.hsl.demoapp.util.SpaceItemDecoration;
 import fi.hsl.digitransit.domain.StopAtDistance;
+import fi.hsl.digitransit.domain.Stoptime;
 
 public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST = 1;
@@ -79,6 +81,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private static class StopAdapter extends RecyclerView.Adapter<StopAdapter.StopViewHolder> {
+        //View pool for nested RecyclerViews
+        private RecyclerView.RecycledViewPool viewPool = new RecyclerView.RecycledViewPool();
+
         private List<StopAtDistance> stops = new ArrayList<>();
 
         public void setData(List<StopAtDistance> stops) {
@@ -90,7 +95,13 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public StopViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new StopViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.stop, parent, false));
+            StopViewHolder stopViewHolder = new StopViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.stop, parent, false));
+
+            stopViewHolder.departures.setRecycledViewPool(viewPool);
+            stopViewHolder.departures.setLayoutManager(new LinearLayoutManager(stopViewHolder.departures.getContext()));
+            stopViewHolder.departures.setAdapter(new DepartureAdapter());
+
+            return stopViewHolder;
         }
 
         @Override
@@ -99,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
             holder.name.setText(stopAtDistance.getStop().getName());
             holder.distance.setText(stopAtDistance.getDistance()+"m");
+            ((DepartureAdapter)holder.departures.getAdapter()).setData(stopAtDistance.getStop().getStoptimesWithoutPatterns());
         }
 
         @Override
@@ -109,12 +121,59 @@ public class MainActivity extends AppCompatActivity {
         public static class StopViewHolder extends RecyclerView.ViewHolder {
             public final TextView name;
             public final TextView distance;
+            public final RecyclerView departures;
 
             public StopViewHolder(View itemView) {
                 super(itemView);
 
                 name = itemView.findViewById(R.id.name);
                 distance = itemView.findViewById(R.id.distance);
+                departures = itemView.findViewById(R.id.departures);
+            }
+        }
+    }
+
+    private static class DepartureAdapter extends RecyclerView.Adapter<DepartureAdapter.DepartureViewHolder> {
+        private List<Stoptime> stoptimes = new ArrayList<>();
+
+        public void setData(List<Stoptime> stoptimes) {
+            this.stoptimes.clear();
+            this.stoptimes.addAll(stoptimes);
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public DepartureViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new DepartureViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.departure, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull DepartureViewHolder holder, int position) {
+            Stoptime stoptime = stoptimes.get(position);
+
+            //Stoptimes are in seconds but DateFormat class uses milliseconds
+            holder.time.setText(DateFormat.getTimeFormat(holder.time.getContext()).format((stoptime.getScheduledDeparture() + stoptime.getServiceDay()) * 1000));
+            holder.route.setText(stoptime.getTrip().getRoute().getShortName());
+            holder.headsign.setText(stoptime.getTrip().getTripHeadsign());
+        }
+
+        @Override
+        public int getItemCount() {
+            return stoptimes.size();
+        }
+
+        public static class DepartureViewHolder extends RecyclerView.ViewHolder {
+            public final TextView time;
+            public final TextView route;
+            public final TextView headsign;
+
+            public DepartureViewHolder(View itemView) {
+                super(itemView);
+
+                time = itemView.findViewById(R.id.time);
+                route = itemView.findViewById(R.id.route);
+                headsign = itemView.findViewById(R.id.headsign);
             }
         }
     }
