@@ -10,12 +10,22 @@ public class Stoptime {
     //Unix time stamp in seconds
     private long serviceDay;
     private Trip trip;
+    private String headsign;
 
-    public Stoptime(long scheduledArrival, long scheduledDeparture, long serviceDay, Trip trip) {
+    public Stoptime(long scheduledArrival, long scheduledDeparture, long serviceDay, Trip trip, String headsign) {
         this.scheduledArrival = scheduledArrival;
         this.scheduledDeparture = scheduledDeparture;
         this.serviceDay = serviceDay;
         this.trip = trip;
+        this.headsign = headsign;
+    }
+
+    public String getHeadsign() {
+        return headsign;
+    }
+
+    public void setHeadsign(String headsign) {
+        this.headsign = headsign;
     }
 
     public long getScheduledArrival() {
@@ -58,11 +68,12 @@ public class Stoptime {
         return scheduledArrival == stoptime.scheduledArrival &&
                 scheduledDeparture == stoptime.scheduledDeparture &&
                 serviceDay == stoptime.serviceDay &&
-                Objects.equals(trip, stoptime.trip);
+                Objects.equals(trip, stoptime.trip) &&
+                Objects.equals(headsign, stoptime.headsign);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(scheduledArrival, scheduledDeparture, serviceDay, trip);
+        return Objects.hash(scheduledArrival, scheduledDeparture, serviceDay, trip, headsign);
     }
 }
