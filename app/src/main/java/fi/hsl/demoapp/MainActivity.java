@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import fi.hsl.demoapp.util.SpaceItemDecoration;
 import fi.hsl.digitransit.domain.StopAtDistance;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         stopsView = findViewById(R.id.stops);
         stopsView.setHasFixedSize(true);
         stopsView.setLayoutManager(new LinearLayoutManager(this));
+        stopsView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.recycler_view_space)));
         stopsAdapter = new StopAdapter();
         stopsView.setAdapter(stopsAdapter);
 
