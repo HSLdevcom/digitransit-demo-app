@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             //Stoptimes are in seconds but DateFormat class uses milliseconds
             holder.time.setText(DateFormat.getTimeFormat(holder.time.getContext()).format((stoptime.getScheduledDeparture() + stoptime.getServiceDay()) * 1000));
             holder.route.setText(stoptime.getTrip().getRoute().getShortName());
-            holder.headsign.setText(stoptime.getTrip().getTripHeadsign());
+            holder.headsign.setText(stoptime.getHeadsign());
         }
 
         @Override
