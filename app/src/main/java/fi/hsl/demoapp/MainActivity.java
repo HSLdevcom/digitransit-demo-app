@@ -13,6 +13,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Arrays;
+import java.util.List;
+
+import fi.hsl.digitransit.domain.StopAtDistance;
 
 public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST = 1;
@@ -25,16 +28,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        viewModel.getLocation().observe(this, new Observer<Location>() {
+        viewModel.getStops().observe(this, new Observer<List<StopAtDistance>>() {
             @Override
-            public void onChanged(@Nullable Location location) {
-                Toast.makeText(MainActivity.this, location.toString(), Toast.LENGTH_LONG).show();
+            public void onChanged(@Nullable List<StopAtDistance> stopAtDistances) {
+                for (StopAtDistance stopAtDistance : stopAtDistances) {
+                    Log.i("MainActivity", stopAtDistance.getStop().getName()+" - "+stopAtDistance.getDistance()+"m");
+                }
             }
         });
 
-        if (!viewModel.getLocation().isLocationRequested()) {
+        if (!viewModel.isDataRequested()) {
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                viewModel.getLocation().requestLocation();
+                viewModel.requestData();
             } else {
                 requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION }, LOCATION_PERMISSION_REQUEST);
             }
@@ -46,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         switch(requestCode) {
             case LOCATION_PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    viewModel.getLocation().requestLocation();
+                    viewModel.requestData();
                 } else {
                     //TODO: handle permission denial
                 }
