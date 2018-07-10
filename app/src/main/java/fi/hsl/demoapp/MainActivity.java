@@ -61,21 +61,28 @@ public class MainActivity extends AppCompatActivity {
         stopsView.setAdapter(stopsAdapter);
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        viewModel.getStops().observe(this, new Observer<List<StopAtDistance>>() {
+        viewModel.getState().observe(this, new Observer<MainViewModel.ViewState>() {
             @Override
-            public void onChanged(@Nullable List<StopAtDistance> stopAtDistances) {
-                progress.setVisibility(View.INVISIBLE);
+            public void onChanged(@Nullable MainViewModel.ViewState viewState) {
+                if (viewState.state == MainViewModel.ViewState.State.LOADING) {
+                    progress.setVisibility(View.VISIBLE);
+                    swipeRefresh.setVisibility(View.INVISIBLE);
+                    swipeRefresh.setEnabled(false);
+                } else if (viewState.state == MainViewModel.ViewState.State.CONTENT) {
+                    progress.setVisibility(View.INVISIBLE);
+                    swipeRefresh.setVisibility(View.VISIBLE);
+                    swipeRefresh.setEnabled(true);
+                    swipeRefresh.setRefreshing(false);
 
-                stopsAdapter.setData(stopAtDistances);
+                    stopsAdapter.setData(viewState.content);
+                }
             }
         });
 
-        if (!viewModel.isDataRequested()) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                viewModel.requestData();
-            } else {
-                requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION }, LOCATION_PERMISSION_REQUEST);
-            }
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            viewModel.notifyPermissionGranted();
+        } else {
+            requestPermissions(new String[]{ Manifest.permission.ACCESS_FINE_LOCATION }, LOCATION_PERMISSION_REQUEST);
         }
     }
 
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         switch(requestCode) {
             case LOCATION_PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    viewModel.requestData();
+                    viewModel.notifyPermissionGranted();
                 } else {
                     //TODO: handle permission denial
                 }
