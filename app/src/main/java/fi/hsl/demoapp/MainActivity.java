@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
     private MainViewModel viewModel;
 
+    private ProgressBar progress;
+
     private RecyclerView stopsView;
     private StopAdapter stopsAdapter;
 
@@ -40,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        progress = findViewById(R.id.progress);
 
         stopsView = findViewById(R.id.stops);
         stopsView.setHasFixedSize(true);
@@ -52,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getStops().observe(this, new Observer<List<StopAtDistance>>() {
             @Override
             public void onChanged(@Nullable List<StopAtDistance> stopAtDistances) {
+                progress.setVisibility(View.INVISIBLE);
+
                 stopsAdapter.setData(stopAtDistances);
             }
         });
