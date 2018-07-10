@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar progress;
 
+    private SwipeRefreshLayout swipeRefresh;
+
     private RecyclerView stopsView;
     private StopAdapter stopsAdapter;
 
@@ -45,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         progress = findViewById(R.id.progress);
+
+        swipeRefresh = findViewById(R.id.swipe_refresh);
+        swipeRefresh.setColorSchemeResources(R.color.colorAccent);
+        swipeRefresh.setEnabled(false);
 
         stopsView = findViewById(R.id.stops);
         stopsView.setHasFixedSize(true);
