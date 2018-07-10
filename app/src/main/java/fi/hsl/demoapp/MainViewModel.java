@@ -73,6 +73,15 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
 
+    @SuppressLint("MissingPermission")
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    public void refresh() {
+        if (viewState.getValue().state == ViewState.State.CONTENT) {
+            viewState.setValue(ViewState.refreshing(viewState.getValue().content));
+            locationLiveData.requestLocation();
+        }
+    }
+
     public LiveData<ViewState> getState() {
         return viewState;
     }

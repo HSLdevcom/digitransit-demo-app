@@ -52,6 +52,12 @@ public class MainActivity extends AppCompatActivity {
         swipeRefresh = findViewById(R.id.swipe_refresh);
         swipeRefresh.setColorSchemeResources(R.color.colorAccent);
         swipeRefresh.setEnabled(false);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                viewModel.refresh();
+            }
+        });
 
         stopsView = findViewById(R.id.stops);
         stopsView.setHasFixedSize(true);
@@ -73,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
                     swipeRefresh.setVisibility(View.VISIBLE);
                     swipeRefresh.setEnabled(true);
                     swipeRefresh.setRefreshing(false);
+
+                    stopsAdapter.setData(viewState.content);
+                } else if (viewState.state == MainViewModel.ViewState.State.REFRESHING) {
+                    progress.setVisibility(View.INVISIBLE);
+                    swipeRefresh.setVisibility(View.VISIBLE);
+                    swipeRefresh.setEnabled(false);
+                    swipeRefresh.setRefreshing(true);
 
                     stopsAdapter.setData(viewState.content);
                 }
