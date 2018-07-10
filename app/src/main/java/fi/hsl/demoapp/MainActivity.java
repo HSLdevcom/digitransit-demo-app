@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             StopAtDistance stopAtDistance = stops.get(position);
 
             holder.name.setText(stopAtDistance.getStop().getName());
-            holder.distance.setText(stopAtDistance.getDistance()+"m");
+            holder.distance.setText(String.format("%dm", stopAtDistance.getDistance()));
             ((DepartureAdapter)holder.departures.getAdapter()).setData(stopAtDistance.getStop().getStoptimesWithoutPatterns());
         }
 
