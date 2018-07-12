@@ -11,6 +11,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.recyclerview.extensions.ListAdapter;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import fi.hsl.demoapp.util.SpaceItemDecoration;
 import fi.hsl.digitransit.domain.StopAtDistance;
@@ -120,6 +123,10 @@ public class MainActivity extends AppCompatActivity {
 
         private List<StopAtDistance> stops = new ArrayList<>();
 
+        public StopAdapter() {
+            viewPool.setMaxRecycledViews(0, 30);
+        }
+
         public void setData(List<StopAtDistance> stops) {
             this.stops.clear();
             this.stops.addAll(stops);
@@ -132,7 +139,9 @@ public class MainActivity extends AppCompatActivity {
             StopViewHolder stopViewHolder = new StopViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.stop, parent, false));
 
             stopViewHolder.departures.setRecycledViewPool(viewPool);
-            stopViewHolder.departures.setLayoutManager(new LinearLayoutManager(stopViewHolder.departures.getContext()));
+            LinearLayoutManager llm = new LinearLayoutManager(stopViewHolder.departures.getContext());
+            llm.setInitialPrefetchItemCount(5);
+            stopViewHolder.departures.setLayoutManager(llm);
             stopViewHolder.departures.setAdapter(new DepartureAdapter());
 
             return stopViewHolder;
@@ -144,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
             holder.name.setText(stopAtDistance.getStop().getName());
             holder.distance.setText(String.format("%dm", stopAtDistance.getDistance()));
-            ((DepartureAdapter)holder.departures.getAdapter()).setData(stopAtDistance.getStop().getStoptimesWithoutPatterns());
+            ((DepartureAdapter)holder.departures.getAdapter()).submitList(stopAtDistance.getStop().getStoptimesWithoutPatterns());
         }
 
         @Override
@@ -167,13 +176,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static class DepartureAdapter extends RecyclerView.Adapter<DepartureAdapter.DepartureViewHolder> {
-        private List<Stoptime> stoptimes = new ArrayList<>();
-
-        public void setData(List<Stoptime> stoptimes) {
-            this.stoptimes.clear();
-            this.stoptimes.addAll(stoptimes);
-            notifyDataSetChanged();
+    private static class DepartureAdapter extends ListAdapter<Stoptime, DepartureAdapter.DepartureViewHolder> {
+        public DepartureAdapter() {
+            super(DIFF_CALLBACK);
         }
 
         @NonNull
@@ -184,17 +189,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull DepartureViewHolder holder, int position) {
-            Stoptime stoptime = stoptimes.get(position);
+            Stoptime stoptime = getItem(position);
 
             //Stoptimes are in seconds but DateFormat class uses milliseconds
             holder.time.setText(DateFormat.getTimeFormat(holder.time.getContext()).format((stoptime.getScheduledDeparture() + stoptime.getServiceDay()) * 1000));
             holder.route.setText(stoptime.getTrip().getRoute().getShortName());
             holder.headsign.setText(stoptime.getHeadsign());
-        }
-
-        @Override
-        public int getItemCount() {
-            return stoptimes.size();
         }
 
         public static class DepartureViewHolder extends RecyclerView.ViewHolder {
@@ -210,5 +210,19 @@ public class MainActivity extends AppCompatActivity {
                 headsign = itemView.findViewById(R.id.headsign);
             }
         }
+
+        public static final DiffUtil.ItemCallback<Stoptime> DIFF_CALLBACK =
+                new DiffUtil.ItemCallback<Stoptime>() {
+
+                    @Override
+                    public boolean areItemsTheSame(Stoptime oldItem, Stoptime newItem) {
+                        return Objects.equals(oldItem.getTrip().getGtfsId(), newItem.getTrip().getGtfsId());
+                    }
+
+                    @Override
+                    public boolean areContentsTheSame(Stoptime oldItem, Stoptime newItem) {
+                        return Objects.equals(oldItem, newItem);
+                    }
+                };
     }
 }
