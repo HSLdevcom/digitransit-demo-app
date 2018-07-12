@@ -3,12 +3,22 @@ package fi.hsl.digitransit.domain;
 import java.util.Objects;
 
 public class Trip {
+    private String gtfsId;
     private String tripHeadsign;
     private Route route;
 
-    public Trip(String tripHeadsign, Route route) {
+    public Trip(String gtfsId, String tripHeadsign, Route route) {
+        this.gtfsId = gtfsId;
         this.tripHeadsign = tripHeadsign;
         this.route = route;
+    }
+
+    public String getGtfsId() {
+        return gtfsId;
+    }
+
+    public void setGtfsId(String gtfsId) {
+        this.gtfsId = gtfsId;
     }
 
     public String getTripHeadsign() {
@@ -32,12 +42,13 @@ public class Trip {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Trip trip = (Trip) o;
-        return Objects.equals(tripHeadsign, trip.tripHeadsign) &&
+        return Objects.equals(gtfsId, trip.gtfsId) &&
+                Objects.equals(tripHeadsign, trip.tripHeadsign) &&
                 Objects.equals(route, trip.route);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tripHeadsign, route);
+        return Objects.hash(gtfsId, tripHeadsign, route);
     }
 }

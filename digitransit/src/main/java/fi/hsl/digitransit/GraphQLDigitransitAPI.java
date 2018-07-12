@@ -53,7 +53,7 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
                 "            scheduledDeparture" +
                 "            serviceDay" +
                 "            headsign" +
-                "            trip { tripHeadsign route { shortName } }" +
+                "            trip { gtfsId tripHeadsign route { shortName } }" +
                 "          }" +
                 "        }" +
                 "        distance" +
