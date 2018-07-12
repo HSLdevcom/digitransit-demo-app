@@ -58,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                //Don't start refresh if already refreshing
+                if (viewModel.getState().getValue().state == MainViewModel.ViewState.State.REFRESHING) {
+                    return;
+                }
+
                 viewModel.refresh();
             }
         });
@@ -87,10 +92,12 @@ public class MainActivity extends AppCompatActivity {
                 } else if (viewState.state == MainViewModel.ViewState.State.REFRESHING) {
                     progress.setVisibility(View.INVISIBLE);
                     swipeRefresh.setVisibility(View.VISIBLE);
-                    swipeRefresh.setEnabled(false);
+                    //swipeRefresh.setEnabled(false);
                     swipeRefresh.setRefreshing(true);
 
-                    stopsAdapter.setData(viewState.content);
+                    if (stopsAdapter.getItemCount() == 0) {
+                        stopsAdapter.setData(viewState.content);
+                    }
                 }
             }
         });
