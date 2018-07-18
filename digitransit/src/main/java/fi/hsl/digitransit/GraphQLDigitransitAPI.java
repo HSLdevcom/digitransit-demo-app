@@ -19,12 +19,14 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class GraphQLDigitransitAPI implements DigitransitAPI {
+    //GraphQL API endpoint
     private static final String API_URL = "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql";
 
+    //Content-Type used in HTTP POST requests
     private static final MediaType JSON_CONTENT_TYPE = MediaType.parse("application/json");
 
     private Gson gson = new GsonBuilder()
-            //register type adapters for gson
+            //register type adapters for Gson
             .registerTypeAdapter(new TypeToken<DigitransitResponse<StopAtDistanceConnection>>(){}.getType(), new DigitransitResponse.DigitransitResponseDeserializer<>(StopAtDistanceConnection.class))
             .registerTypeAdapter(new TypeToken<DigitransitResponse<Stop[]>>(){}.getType(), new DigitransitResponse.DigitransitResponseDeserializer<>(Stop[].class))
             .create();
@@ -75,7 +77,7 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
         //List all stops with name and GTFS id
         String query = "query Stops {" +
                         "stops {" +
-                        "  gtfsId" +
+                        "    gtfsId" +
                         "    name" +
                         "  }" +
                         "}";
