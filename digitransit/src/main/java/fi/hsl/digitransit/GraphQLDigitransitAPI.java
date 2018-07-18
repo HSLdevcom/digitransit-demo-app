@@ -95,7 +95,10 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
                 "  }" +
                 "}";
 
-        return doQuery(query, Stop[].class);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("name", name);
+
+        return doQuery(query, variables, Stop[].class);
     }
 
     private <T> T doQuery(String query, Class<T> klass) throws IOException {
