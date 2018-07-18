@@ -3,6 +3,7 @@ package fi.hsl.digitransit.transport;
 import java.util.Map;
 import java.util.Objects;
 
+//This class is used to create a request, which will be serialized to json using Gson and sent to GraphQL API using HTTP POST
 public class DigitransitRequest {
     private String query;
     private Map<String, ?> variables;
