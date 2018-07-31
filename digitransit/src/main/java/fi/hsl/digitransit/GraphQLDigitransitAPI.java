@@ -89,7 +89,7 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
     @Override
     public Stop[] queryStops(String name) throws IOException {
         //Query stops by name
-        String query = "query Stops($name: String) {" +
+        String query = "query StopsByName($name: String) {" +
                 "  stops(name: $name) {" +
                 "    gtfsId" +
                 "    name" +
