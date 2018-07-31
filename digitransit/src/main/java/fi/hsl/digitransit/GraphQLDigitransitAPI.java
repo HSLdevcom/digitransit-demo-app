@@ -29,6 +29,7 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
             //register type adapters for Gson
             .registerTypeAdapter(new TypeToken<DigitransitResponse<StopAtDistanceConnection>>(){}.getType(), new DigitransitResponse.DigitransitResponseDeserializer<>(StopAtDistanceConnection.class))
             .registerTypeAdapter(new TypeToken<DigitransitResponse<Stop[]>>(){}.getType(), new DigitransitResponse.DigitransitResponseDeserializer<>(Stop[].class))
+            .registerTypeAdapter(new TypeToken<DigitransitResponse<Stop>>(){}.getType(), new DigitransitResponse.DigitransitResponseDeserializer<>(Stop.class))
             .create();
 
     private OkHttpClient httpClient;
@@ -100,6 +101,31 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
 
         return doQuery(query, variables, Stop[].class);
     }
+
+    @Override
+    public Stop queryStopById(String gtfsId) throws Exception {
+        //Query stops by name
+        String query = "query StopById($gtfsId: String!) {" +
+        "    stop(id: $gtfsId) {" +
+        "        gtfsId" +
+        "        name" +
+        "        code" +
+        "        stoptimesWithoutPatterns(numberOfDepartures: 15, timeRange: 7200, omitNonPickups: true) {" +
+        "            scheduledArrival" +
+        "            scheduledDeparture" +
+        "            serviceDay" +
+        "            headsign" +
+        "            trip { gtfsId tripHeadsign route { shortName } }" +
+        "        }" +
+        "    }" +
+        "}";
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("gtfsId", gtfsId);
+
+        return doQuery(query, variables, Stop.class);
+    }
+
 
     private <T> T doQuery(String query, Class<T> klass) throws IOException {
         return doQuery(query, null, klass);

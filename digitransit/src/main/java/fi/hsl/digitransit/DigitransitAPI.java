@@ -9,4 +9,5 @@ public interface DigitransitAPI {
     StopAtDistanceConnection queryStopsByLocation(double latitude, double longitude, int radius) throws Exception;
     Stop[] queryStops() throws Exception;
     Stop[] queryStops(String name) throws Exception;
+    Stop queryStopById(String gtfsId) throws Exception;
 }
