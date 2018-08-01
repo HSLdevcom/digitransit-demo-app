@@ -32,11 +32,12 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"/>
         </LinearLayout>
 
-        <android.support.v7.widget.RecyclerView
+        <!-- UntouchableRecyclerView is used to pass click events to parent view -->
+        <fi.hsl.demoapp.util.UntouchableRecyclerView
             android:id="@+id/departures"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-        </android.support.v7.widget.RecyclerView>
+        </fi.hsl.demoapp.util.UntouchableRecyclerView>
     </LinearLayout>
 
 </android.support.v7.widget.CardView>
