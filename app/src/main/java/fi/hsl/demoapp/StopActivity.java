@@ -61,7 +61,7 @@ public class StopActivity extends AppCompatActivity {
         departuresView.setHasFixedSize(true);
         departuresView.setLayoutManager(new LinearLayoutManager(this));
         departuresView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.recycler_view_space)));
-        departureAdapter = new DepartureAdapter();
+        departureAdapter = new DepartureAdapter(true);
         departuresView.setAdapter(departureAdapter);
 
         viewModel = ViewModelProviders.of(this).get(StopViewModel.class);

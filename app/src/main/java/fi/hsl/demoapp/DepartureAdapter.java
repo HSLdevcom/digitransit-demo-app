@@ -16,14 +16,22 @@ import java.util.Objects;
 import fi.hsl.digitransit.domain.Stoptime;
 
 public class DepartureAdapter extends ListAdapter<Stoptime, DepartureAdapter.DepartureViewHolder> {
+    private boolean largeViews;
+
     public DepartureAdapter() {
+        this(false);
+    }
+
+    public DepartureAdapter(boolean largeViews) {
         super(DIFF_CALLBACK);
+
+        this.largeViews = largeViews;
     }
 
     @NonNull
     @Override
     public DepartureViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new DepartureViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.departure, parent, false));
+        return new DepartureViewHolder(LayoutInflater.from(parent.getContext()).inflate(largeViews ? R.layout.departure_large : R.layout.departure, parent, false));
     }
 
     @Override
