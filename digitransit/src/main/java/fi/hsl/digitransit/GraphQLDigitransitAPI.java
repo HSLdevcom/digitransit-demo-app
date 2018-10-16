@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import fi.hsl.digitransit.transport.DigitransitRequest;
-import fi.hsl.digitransit.transport.DigitransitResponse;
 import fi.hsl.digitransit.domain.Stop;
 import fi.hsl.digitransit.domain.StopAtDistanceConnection;
+import fi.hsl.digitransit.transport.DigitransitRequest;
+import fi.hsl.digitransit.transport.DigitransitResponse;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,7 +41,7 @@ public class GraphQLDigitransitAPI implements DigitransitAPI {
     @Override
     public StopAtDistanceConnection queryStopsByLocation(double latitude, double longitude, int radius) throws IOException {
         //Query stops (and 5 next departures from each stop) by location
-        String query = "query StopsByRadius($lat: Float, $lon: Float, $radius: Int) {" +
+        String query = "query StopsByRadius($lat: Float!, $lon: Float!, $radius: Int!) {" +
                 "  stopsByRadius(lat: $lat, lon: $lon, radius: $radius) {" +
                 "    edges {" +
                 "      node {" +

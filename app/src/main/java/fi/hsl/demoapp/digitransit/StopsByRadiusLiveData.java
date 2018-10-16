@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import fi.hsl.digitransit.DigitransitAPI;
 import fi.hsl.digitransit.domain.StopAtDistance;
