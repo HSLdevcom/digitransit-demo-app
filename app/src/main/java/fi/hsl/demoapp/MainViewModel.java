@@ -7,29 +7,25 @@ import android.arch.core.util.Function;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.Transformations;
-import android.arch.lifecycle.ViewModel;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
-import android.view.View;
 
 import java.util.List;
 
 import fi.hsl.demoapp.digitransit.StopsByRadiusLiveData;
 import fi.hsl.demoapp.location.LocationLiveData;
+import fi.hsl.demoapp.util.ViewState;
 import fi.hsl.digitransit.DigitransitAPI;
 import fi.hsl.digitransit.GraphQLDigitransitAPI;
-import fi.hsl.digitransit.domain.Stop;
 import fi.hsl.digitransit.domain.StopAtDistance;
-import fi.hsl.digitransit.domain.StopAtDistanceConnection;
 import okhttp3.OkHttpClient;
 
 public class MainViewModel extends AndroidViewModel {
-    private MediatorLiveData<ViewState> viewState;
+    private MediatorLiveData<ViewState<List<StopAtDistance>>> viewState;
 
     //Live data for location update
     private LocationLiveData locationLiveData;
@@ -45,20 +41,20 @@ public class MainViewModel extends AndroidViewModel {
         viewState = new MediatorLiveData<>();
 
         locationLiveData = new LocationLiveData(getApplication());
-        LiveData<ViewState> stopLiveData = Transformations.map(Transformations.switchMap(locationLiveData, new Function<Location, LiveData<List<StopAtDistance>>>() {
+        LiveData<ViewState<List<StopAtDistance>>> stopLiveData = Transformations.map(Transformations.switchMap(locationLiveData, new Function<Location, LiveData<List<StopAtDistance>>>() {
             @Override
             public LiveData<List<StopAtDistance>> apply(Location input) {
                 return new StopsByRadiusLiveData(digitransitAPI, input.getLatitude(), input.getLongitude(), 500);
             }
-        }), new Function<List<StopAtDistance>, ViewState>() {
+        }), new Function<List<StopAtDistance>, ViewState<List<StopAtDistance>>>() {
             @Override
-            public ViewState apply(List<StopAtDistance> input) {
+            public ViewState<List<StopAtDistance>> apply(List<StopAtDistance> input) {
                 return ViewState.content(input);
             }
         });
-        viewState.addSource(stopLiveData, new Observer<ViewState>() {
+        viewState.addSource(stopLiveData, new Observer<ViewState<List<StopAtDistance>>>() {
             @Override
-            public void onChanged(@Nullable ViewState vs) {
+            public void onChanged(@Nullable ViewState<List<StopAtDistance>> vs) {
                 viewState.setValue(vs);
             }
         });
@@ -82,37 +78,7 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
 
-    public LiveData<ViewState> getState() {
+    public LiveData<ViewState<List<StopAtDistance>>> getState() {
         return viewState;
-    }
-
-    public static class ViewState {
-        public enum State { LOADING, REFRESHING, CONTENT, ERROR }
-
-        public State state;
-        public List<StopAtDistance> content;
-        public String error;
-
-        private ViewState(State state, List<StopAtDistance> content, String error) {
-            this.state = state;
-            this.content = content;
-            this.error = error;
-        }
-
-        public static ViewState loading() {
-            return new ViewState(State.LOADING, null, null);
-        }
-
-        public static ViewState refreshing(List<StopAtDistance> content) {
-            return new ViewState(State.REFRESHING, content, null);
-        }
-
-        public static ViewState content(List<StopAtDistance> content) {
-            return new ViewState(State.CONTENT, content, null);
-        }
-
-        public static ViewState error(String error) {
-            return new ViewState(State.ERROR, null, error);
-        }
     }
 }

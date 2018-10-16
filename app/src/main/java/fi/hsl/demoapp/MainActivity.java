@@ -2,38 +2,28 @@ package fi.hsl.demoapp;
 
 import android.Manifest;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
-import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.recyclerview.extensions.ListAdapter;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import fi.hsl.demoapp.util.OnItemClickListener;
 import fi.hsl.demoapp.util.SpaceItemDecoration;
-import fi.hsl.digitransit.domain.Stop;
+import fi.hsl.demoapp.util.ViewState;
 import fi.hsl.digitransit.domain.StopAtDistance;
-import fi.hsl.digitransit.domain.Stoptime;
 
 public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_PERMISSION_REQUEST = 1;
@@ -61,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 //Don't start refresh if already refreshing
-                if (viewModel.getState().getValue().state == MainViewModel.ViewState.State.REFRESHING) {
+                if (viewModel.getState().getValue().state == ViewState.State.REFRESHING) {
                     return;
                 }
 
@@ -86,21 +76,21 @@ public class MainActivity extends AppCompatActivity {
         stopsView.setAdapter(stopsAdapter);
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        viewModel.getState().observe(this, new Observer<MainViewModel.ViewState>() {
+        viewModel.getState().observe(this, new Observer<ViewState<List<StopAtDistance>>>() {
             @Override
-            public void onChanged(@Nullable MainViewModel.ViewState viewState) {
-                if (viewState.state == MainViewModel.ViewState.State.LOADING) {
+            public void onChanged(@Nullable ViewState<List<StopAtDistance>> viewState) {
+                if (viewState.state == ViewState.State.LOADING) {
                     progress.setVisibility(View.VISIBLE);
                     swipeRefresh.setVisibility(View.INVISIBLE);
                     swipeRefresh.setEnabled(false);
-                } else if (viewState.state == MainViewModel.ViewState.State.CONTENT) {
+                } else if (viewState.state == ViewState.State.CONTENT) {
                     progress.setVisibility(View.INVISIBLE);
                     swipeRefresh.setVisibility(View.VISIBLE);
                     swipeRefresh.setEnabled(true);
                     swipeRefresh.setRefreshing(false);
 
                     stopsAdapter.setData(viewState.content);
-                } else if (viewState.state == MainViewModel.ViewState.State.REFRESHING) {
+                } else if (viewState.state == ViewState.State.REFRESHING) {
                     progress.setVisibility(View.INVISIBLE);
                     swipeRefresh.setVisibility(View.VISIBLE);
                     //swipeRefresh.setEnabled(false);

@@ -15,6 +15,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import fi.hsl.demoapp.util.SpaceItemDecoration;
+import fi.hsl.demoapp.util.ViewState;
+import fi.hsl.digitransit.domain.Stop;
 
 public class StopActivity extends AppCompatActivity {
     private static final String GTFS_ID = "gtfs_id";
@@ -49,7 +51,7 @@ public class StopActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 //Don't start refresh if already refreshing
-                if (viewModel.getState().getValue().state == StopViewModel.ViewState.State.REFRESHING) {
+                if (viewModel.getState().getValue().state == ViewState.State.REFRESHING) {
                     return;
                 }
 
@@ -69,14 +71,14 @@ public class StopActivity extends AppCompatActivity {
         //Set stop id to load
         viewModel.setStopId(getIntent().getStringExtra(GTFS_ID));
 
-        viewModel.getState().observe(this, new Observer<StopViewModel.ViewState>() {
+        viewModel.getState().observe(this, new Observer<ViewState<Stop>>() {
             @Override
-            public void onChanged(@Nullable StopViewModel.ViewState viewState) {
-                if (viewState.state == StopViewModel.ViewState.State.LOADING) {
+            public void onChanged(@Nullable ViewState<Stop> viewState) {
+                if (viewState.state == ViewState.State.LOADING) {
                     progress.setVisibility(View.VISIBLE);
                     swipeRefresh.setVisibility(View.INVISIBLE);
                     swipeRefresh.setEnabled(false);
-                } else if (viewState.state == StopViewModel.ViewState.State.CONTENT) {
+                } else if (viewState.state == ViewState.State.CONTENT) {
                     progress.setVisibility(View.INVISIBLE);
                     swipeRefresh.setVisibility(View.VISIBLE);
                     swipeRefresh.setEnabled(true);
@@ -85,7 +87,7 @@ public class StopActivity extends AppCompatActivity {
                     getSupportActionBar().setTitle(viewState.content.getName());
                     getSupportActionBar().setSubtitle(viewState.content.getCode());
                     departureAdapter.submitList(viewState.content.getStoptimesWithoutPatterns());
-                } else if (viewState.state == StopViewModel.ViewState.State.REFRESHING) {
+                } else if (viewState.state == ViewState.State.REFRESHING) {
                     progress.setVisibility(View.INVISIBLE);
                     swipeRefresh.setVisibility(View.VISIBLE);
                     //swipeRefresh.setEnabled(false);
